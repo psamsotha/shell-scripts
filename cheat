@@ -1,0 +1,145 @@
+#!/bin/bash
+
+# This script helps with the management of simple
+# cheat sheets that you edit and view from the terminal.
+
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+if ! [ -d "${SCRIPT_DIR}/cheats" ]; then
+  mkdir "${SCRIPT_DIR}/cheats"
+fi
+
+SHEET_FILES=( `ls ${SCRIPT_DIR}/cheats/*.txt 2>/dev/null` )
+SHEETS=()
+
+for sheet in "${SHEET_FILES[@]}"; do
+  SHEETS+=("$(basename $sheet .txt)")
+done
+
+
+print_available_sheets() {
+  echo "Available cheat sheets:"
+
+  if [ ${#SHEETS[@]} -eq 0 ]; then
+    echo "  None"
+    return 0
+  fi
+
+  for sheet in "${SHEETS[@]}"; do
+    echo " - $sheet"
+  done
+}
+
+
+print_usage() {
+  echo "Usage: cheat [options] <cheat sheet>"
+  echo ""
+  echo "Options:"
+  echo "  -n | --new <cheat sheet>"
+  echo "    Create new cheat sheet and enter edit mode"
+  echo "  -e | --edit <cheat sheet>"
+  echo "    Edit the source cheat sheet"
+  echo "  -l | --list"
+  echo "    List available cheat sheets"
+  echo "  -h | --help"
+  echo "    Print usage"
+  echo ""
+  print_available_sheets
+  echo ""
+}
+
+
+sheet_available() {
+  local e match="$1"
+  shift
+  for e; do [[ "$e" == "$match" ]] && return 0; done
+  return 1
+}
+
+
+while [ -n "$1" ]; do
+  case "$1" in
+    -n | --new  )
+      new=true
+      new_sheet="$2"
+      break
+      ;;
+    -e | --edit )
+      edit=true
+      ;;
+    -l | --list )
+      echo ""
+      print_available_sheets
+      exit 0
+      ;;
+    -h | --help )
+      print_usage
+      exit 0
+      ;;
+    * )
+      if sheet_available "$1" "${SHEETS[@]}"; then
+        selected_sheet="$1"
+        break
+      else
+        echo "Cheat sheet $1 not available."
+        print_available_sheets
+        exit 1
+      fi
+      ;;
+  esac
+  shift
+done
+
+
+edit_file() {
+  nano "$1"
+}
+
+
+create_new_file() {
+  if [ -z "$new_sheet" ]; then
+    echo "You must specify a new cheat sheet to create."
+    print_usage
+    exit 1
+  fi
+
+  if [ -e "${SCRIPT_DIR}/cheats/${new_sheet}.txt" ];
+    read -p "Cheat sheet '$new_sheet' exits. Do you want to overwrite it [y/N]? "
+    if [ "$REPLY" != "y" ]; then
+      exit 0
+    fi
+  else
+    edit_file "${SCRIPT_DIR}/cheats/${new_sheet}.txt"
+  fi
+
+  exit 0
+}
+
+
+if [ "$new" == true ]; then
+  create_new_file
+  exit 0
+fi
+
+
+if [ -z "$selected_sheet" ]; then
+  echo "Cheat sheet not provided."
+  print_usage
+  exit 1
+fi
+
+
+if [ "$edit" == true ]; then
+  edit_file "${SCRIPT_DIR}/cheats/${selected_file}.txt"
+  exit 0
+else
+
+
+cat "${SCRIPT_DIR}/cheats/${selected_file}.txt"
+
+
+exit 0
+
+
+
+
