@@ -5,6 +5,7 @@
 
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
 if ! [ -d "${SCRIPT_DIR}/cheats" ]; then
   mkdir "${SCRIPT_DIR}/cheats"
 fi
@@ -30,7 +31,6 @@ print_available_sheets() {
   done
 }
 
-
 print_usage() {
   echo "Usage: cheat [options] <cheat sheet>"
   echo "With no options, the cheat sheet will just be displayed."
@@ -50,24 +50,71 @@ print_usage() {
   echo ""
 }
 
-
-sheet_available() {
-  local e match="$1"
-  shift
-  for e; do [[ "$e" == "$match" ]] && return 0; done
+sheet_exists() {
+  local match="$1"
+  for s in "${SHEETS[@]}"; do [[ "$s" == "$match" ]] && return 0; done
   return 1
+}
+
+check_sheet_exists() {
+  local sheet="$1"
+  if ! sheet_exists "$sheet" ; then
+    echo "Cheat sheet '$sheet' does not exists"
+    print_available_sheets
+    exit 1
+  fi
+}
+
+edit_file() {
+  local sheet="$1"
+  if [ -z "$sheet" ]; then
+    echo "You must provide a sheet to edit."
+    print_usage
+    exit 1
+  else
+    nano "${SCRIPT_DIR}/cheats/${sheet}.txt"
+  fi
+}
+
+create_new_file() {
+  local new_sheet="$1"
+
+  if [ -z "$new_sheet" ]; then
+    echo "You must specify a new cheat sheet to create."
+    print_usage
+    exit 1
+  fi
+
+  if sheet_exists "$new_sheet" ; then
+    read -p "Cheat sheet '$new_sheet' exists. Do you want to overwrite it [y/N]? "
+    if [ "$REPLY" != "y" ]; then
+      exit 0
+    fi
+  fi
+
+  edit_file "$new_sheet"
+}
+
+delete_sheet() {
+  local sheet="$1"
+
+  read -p "Are you sure you want to delete '$sheet' [y/N]? "
+  if [ "$REPLY" == "y" ]; then
+    rm "${SCRIPT_DIR}/cheats/${sheet}.txt"
+  fi
 }
 
 
 while [ -n "$1" ]; do
   case "$1" in
     -n | --new  )
-      new=true
-      new_sheet="$2"
-      break
+      create_new_file "$2"
+      exit 0
       ;;
     -e | --edit )
-      edit=true
+      check_sheet_exists "$2"
+      edit_file "$2"
+      exit 0
       ;;
     -l | --list )
       print_available_sheets
@@ -78,78 +125,16 @@ while [ -n "$1" ]; do
       exit 0
       ;;
     --rm )
-      remove=true
+      check_sheet_exists "$2"
+      delete_sheet "$2"
+      exit 0
       ;;
     * )
-      if sheet_available "$1" "${SHEETS[@]}"; then
-        selected_sheet="$1"
-        break
-      else
-        echo "Cheat sheet $1 not available."
-        print_available_sheets
-        exit 1
-      fi
+      check_sheet_exists "$1"
+      cat "${SCRIPT_DIR}/cheats/${1}.txt"
+      exit 0
       ;;
   esac
   shift
 done
-
-
-edit_file() {
-  nano "$1"
-}
-
-
-create_new_file() {
-  if [ -z "$new_sheet" ]; then
-    echo "You must specify a new cheat sheet to create."
-    print_usage
-    exit 1
-  fi
-
-  if [ -e "${SCRIPT_DIR}/cheats/${new_sheet}.txt" ]; then
-    read -p "Cheat sheet '$new_sheet' exits. Do you want to overwrite it [y/N]? "
-    if [ "$REPLY" != "y" ]; then
-      exit 0
-    fi
-  else
-    edit_file "${SCRIPT_DIR}/cheats/${new_sheet}.txt"
-  fi
-
-  exit 0
-}
-
-
-if [ "$new" == true ]; then
-  create_new_file
-  exit 0
-fi
-
-
-if [ -z "$selected_sheet" ]; then
-  echo "Cheat sheet not provided."
-  print_usage
-  exit 1
-fi
-
-
-if [ "$edit" == true ]; then
-  edit_file "${SCRIPT_DIR}/cheats/${selected_sheet}.txt"
-  exit 0
-fi
-
-
-if [ "$remove" == true ]; then
-  read -p "Are you sure you want to delete '${selected_sheet} [y/N]? "
-  if [ "$REPLY" == "y" ]; then
-    rm "${SCRIPT_DIR}/cheats/${selected_sheet}.txt"
-  fi
-  exit 0
-fi
-
-
-cat "${SCRIPT_DIR}/cheats/${selected_sheet}.txt"
-
-
-exit 0
 
