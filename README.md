@@ -7,11 +7,12 @@ A collection of some shell scripts that I use for common tasks.
 
 To install the scripts, clone this repository, then put the project
 directory on the `PATH`. Then you should be able to use the command
-without having to use an absolute path
+without having to use the path of the script
 
 ```shell
 cd <install-dir>
-export PATH=$PATH:<install-dir>/shell-scripts
+git clone https://github.com/psamsotha/shell-scripts.git
+export PATH="${PATH}:<install-dir>/shell-scripts"
 ```
 
 If you dont want to have to keep typing the `export` everytime you open
