@@ -33,7 +33,7 @@ print_available_sheets() {
 
 print_usage() {
   echo "Usage: cheat [options] <cheat sheet>"
-  echo ""
+  echo "With no options, the cheat sheet will just be displayed."
   echo "Options:"
   echo "  -n | --new <cheat sheet>"
   echo "    Create new cheat sheet and enter edit mode"
@@ -68,7 +68,6 @@ while [ -n "$1" ]; do
       edit=true
       ;;
     -l | --list )
-      echo ""
       print_available_sheets
       exit 0
       ;;
@@ -103,7 +102,7 @@ create_new_file() {
     exit 1
   fi
 
-  if [ -e "${SCRIPT_DIR}/cheats/${new_sheet}.txt" ];
+  if [ -e "${SCRIPT_DIR}/cheats/${new_sheet}.txt" ]; then
     read -p "Cheat sheet '$new_sheet' exits. Do you want to overwrite it [y/N]? "
     if [ "$REPLY" != "y" ]; then
       exit 0
@@ -130,12 +129,12 @@ fi
 
 
 if [ "$edit" == true ]; then
-  edit_file "${SCRIPT_DIR}/cheats/${selected_file}.txt"
+  edit_file "${SCRIPT_DIR}/cheats/${selected_sheet}.txt"
   exit 0
-else
+fi
 
 
-cat "${SCRIPT_DIR}/cheats/${selected_file}.txt"
+cat "${SCRIPT_DIR}/cheats/${selected_sheet}.txt"
 
 
 exit 0
