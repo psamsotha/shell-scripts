@@ -43,6 +43,8 @@ print_usage() {
   echo "    List available cheat sheets"
   echo "  -h | --help"
   echo "    Print usage"
+  echo "  --rm <cheat sheet>"
+  echo "    Delete the cheat sheet"
   echo ""
   print_available_sheets
   echo ""
@@ -74,6 +76,9 @@ while [ -n "$1" ]; do
     -h | --help )
       print_usage
       exit 0
+      ;;
+    --rm )
+      remove=true
       ;;
     * )
       if sheet_available "$1" "${SHEETS[@]}"; then
@@ -134,11 +139,17 @@ if [ "$edit" == true ]; then
 fi
 
 
+if [ "$remove" == true ]; then
+  read -p "Are you sure you want to delete '${selected_sheet} [y/N]? "
+  if [ "$REPLY" == "y" ]; then
+    rm "${SCRIPT_DIR}/cheats/${selected_sheet}.txt"
+  fi
+  exit 0
+fi
+
+
 cat "${SCRIPT_DIR}/cheats/${selected_sheet}.txt"
 
 
 exit 0
-
-
-
 
