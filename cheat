@@ -4,17 +4,17 @@
 # cheat sheets that you edit and view from the terminal.
 
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 if ! [ -d "${SCRIPT_DIR}/cheats" ]; then
   mkdir "${SCRIPT_DIR}/cheats"
 fi
 
-SHEET_FILES=( `ls ${SCRIPT_DIR}/cheats/*.txt 2>/dev/null` )
+SHEET_FILES=$( ls "${SCRIPT_DIR}"/cheats/*.txt 2>/dev/null )
 SHEETS=()
 
 for sheet in "${SHEET_FILES[@]}"; do
-  SHEETS+=("$(basename $sheet .txt)")
+  SHEETS+=("$(basename "$sheet" .txt)")
 done
 
 
@@ -86,7 +86,7 @@ create_new_file() {
   fi
 
   if sheet_exists "$new_sheet" ; then
-    read -p "Cheat sheet '$new_sheet' exists. Do you want to overwrite it [y/N]? "
+    read -r -p "Cheat sheet '$new_sheet' exists. Do you want to overwrite it [y/N]? "
     if [ "$REPLY" != "y" ]; then
       exit 0
     fi
@@ -98,7 +98,7 @@ create_new_file() {
 delete_sheet() {
   local sheet="$1"
 
-  read -p "Are you sure you want to delete '$sheet' [y/N]? "
+  read -r -p "Are you sure you want to delete '$sheet' [y/N]? "
   if [ "$REPLY" == "y" ]; then
     rm "${SCRIPT_DIR}/cheats/${sheet}.txt"
   fi
