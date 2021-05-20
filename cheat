@@ -10,12 +10,7 @@ if ! [ -d "${SCRIPT_DIR}/cheats" ]; then
   mkdir "${SCRIPT_DIR}/cheats"
 fi
 
-SHEET_FILES=$( ls "${SCRIPT_DIR}"/cheats/*.txt 2>/dev/null )
-SHEETS=()
-
-for sheet in "${SHEET_FILES[@]}"; do
-  SHEETS+=("$(basename "$sheet" .txt)")
-done
+SHEETS=( $(find "${SCRIPT_DIR}"/cheats -name "*.txt" -exec basename {} .txt \;) )
 
 
 print_available_sheets() {
@@ -26,8 +21,8 @@ print_available_sheets() {
     return 0
   fi
 
-  for sheet in "${SHEETS[@]}"; do
-    echo " - $sheet"
+  for s in "${SHEETS[@]}"; do
+    echo " - $s"
   done
 }
 
